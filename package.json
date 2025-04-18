@@ -14,9 +14,16 @@
     "type": "git",
     "url": "git+https://github.com/casdijkman/expect.git"
   },
-  "main": "expect.js",
+  "main": "dist/expect.js",
+  "types": "index.d.ts",
   "packageManager": "yarn@4.6.0",
   "bugs": {
     "url": "https://github.com/casdijkman/expect/issues"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
   }
 }
