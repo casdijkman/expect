@@ -1,0 +1,22 @@
+{
+  "name": "@casd/expect",
+  "version": "0.0.1",
+  "description": "Simple javascript expect library, no frills",
+  "author": "Cas Dijkman <info@cdijkman.nl> (https://cdijkman.nl)",
+  "keywords": [
+    "test",
+    "expect",
+    "simple"
+  ],
+  "homepage": "https://cdijkman.nl/",
+  "license": "GPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/casdijkman/expect.git"
+  },
+  "main": "expect.js",
+  "packageManager": "yarn@4.6.0",
+  "bugs": {
+    "url": "https://github.com/casdijkman/expect/issues"
+  }
+}
