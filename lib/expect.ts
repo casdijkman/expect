@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+import type { AssertionType } from '../index.d.js';
+
 const validTypeOfs = [
   'undefined',
   'object',
@@ -15,8 +17,14 @@ const validTypeOfs = [
   'function'
 ];
 
-class Assertion {
-  constructor ({ value, description }) {
+class Assertion implements AssertionType {
+  value;
+  descriptions;
+  invert = false;
+  to;
+  be;
+
+  constructor ({ value, description }: { value: any, description?: string }) {
     this.value = value;
     this.descriptions = [
       ...(typeof description === 'string' ? [description] : [])
@@ -38,7 +46,7 @@ class Assertion {
     return this;
   }
 
-  equal (expected) {
+  equal (expected: any) {
     this._addDescription({ expected });
     if ([expected, this.value].some((x) => typeof x === 'symbol')) {
       this.descriptions.push('Symbols are always unique');
@@ -46,7 +54,16 @@ class Assertion {
     return this.execute(() => this.value === expected);
   }
 
-  _addDescription ({ type, expected, got = this.value }) {
+  _addDescription (
+    {
+      type,
+      expected,
+      got = this.value
+    }: {
+      type?: string;
+      expected: any;
+      got?: any;
+    }) {
     this.descriptions.push(
       'Expected'
         .concat(this.invert ? ' not' : '')
@@ -56,7 +73,7 @@ class Assertion {
     );
   }
 
-  _expectToBeA (expected) {
+  _expectToBeA (expected: any) {
     if (typeof expected === 'string') {
       return this._expectToBeATypeOf(expected);
     } else {
@@ -64,14 +81,14 @@ class Assertion {
     }
   }
 
-  _expectToBeAnInstanceOf (expected) {
+  _expectToBeAnInstanceOf (expected: any) {
     return this.execute(() => {
       this._addDescription({ type: 'instanceof', expected: expected?.name || expected });
       return this.value instanceof (expected);
     });
   }
 
-  _expectToBeATypeOf (expected) {
+  _expectToBeATypeOf (expected: any) {
     return this.execute(() => {
       this._addDescription({ type: 'typeof', expected });
 
@@ -95,7 +112,7 @@ class Assertion {
     });
    }
 
-  execute (predicate) {
+  execute (predicate: () => any) {
     const result = this.invert ? !predicate() : predicate();
     const description = this.descriptions.length > 0
       ? this.descriptions.join('. ').concat('.')
@@ -105,32 +122,32 @@ class Assertion {
   }
 }
 
-function valueToStringSafe (value) {
+function valueToStringSafe (value: any) {
   const stringValue = String(value);
   if (stringValue === '') {
     return '<empty string>';
   }
-  console.assert(stringValue, 'could not convert value to string', value);
+  console.assert(Boolean(stringValue), 'could not convert value to string', value);
   return stringValue || 'unknown';
 }
 
-export function describe (description) {
+export function describe (description: string) {
   return { expect: expect.bind({ description }) };
 }
 
-export function expect (value) {
+export function expect (this: { description?: string }, value: any) {
   const assertionInstance = new Assertion({
     value,
     description: this?.description
   });
 
   const proxyHandler = {
-    get (target, prop, receiver) {
-      const value = Reflect.get(target, prop, receiver);
+    get (target: any, prop: string, receiver: any) {
+      const assertionValue = Reflect.get(target, prop, receiver);
       if (prop === 'not') {
         return target.not();
       } else {
-        return value;
+        return assertionValue;
       }
     }
   };
