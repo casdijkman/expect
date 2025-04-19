@@ -4,7 +4,20 @@
  *
  * SPDX-License-Identifier: GPL-3.0-only
  */
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+};
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _Assertion_instances, _Assertion_value, _Assertion_descriptions, _Assertion_invert, _Assertion_addDescription, _Assertion_expectToBeA, _Assertion_expectToBeAnInstanceOf, _Assertion_expectToBeATypeOf, _Assertion_expectToBeTruthy, _Assertion_expectToBeFalsy, _Assertion_execute;
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Assertion = void 0;
 exports.describe = describe;
 exports.expect = expect;
 const validTypeOfs = [
@@ -19,82 +32,80 @@ const validTypeOfs = [
 ];
 class Assertion {
     constructor({ value, description }) {
-        this.invert = false;
-        this.value = value;
-        this.descriptions = [
+        _Assertion_instances.add(this);
+        _Assertion_value.set(this, void 0);
+        _Assertion_descriptions.set(this, void 0);
+        _Assertion_invert.set(this, false);
+        __classPrivateFieldSet(this, _Assertion_value, value, "f");
+        __classPrivateFieldSet(this, _Assertion_descriptions, [
             ...(typeof description === 'string' ? [description] : [])
-        ];
+        ], "f");
         this.to = this;
         this.be = {
-            a: this._expectToBeA.bind(this),
-            an: this._expectToBeA.bind(this),
-            typeOf: this._expectToBeATypeOf.bind(this),
-            instanceOf: this._expectToBeAnInstanceOf.bind(this),
-            truthy: this._expectToBeTruthy.bind(this),
-            falsy: this._expectToBeFalsy.bind(this),
+            a: __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_expectToBeA).bind(this),
+            an: __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_expectToBeA).bind(this),
+            typeOf: __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_expectToBeATypeOf).bind(this),
+            instanceOf: __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_expectToBeAnInstanceOf).bind(this),
+            truthy: __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_expectToBeTruthy).bind(this),
+            falsy: __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_expectToBeFalsy).bind(this),
         };
     }
-    not() {
-        this.invert = true;
+    invertPredicate() {
+        __classPrivateFieldSet(this, _Assertion_invert, true, "f");
         return this;
     }
     equal(expected) {
-        this._addDescription({ expected });
-        if ([expected, this.value].some((x) => typeof x === 'symbol')) {
-            this.descriptions.push('Symbols are always unique');
+        __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_addDescription).call(this, { expected });
+        if ([expected, __classPrivateFieldGet(this, _Assertion_value, "f")].some((x) => typeof x === 'symbol')) {
+            __classPrivateFieldGet(this, _Assertion_descriptions, "f").push('Symbols are always unique');
         }
-        return this.execute(() => this.value === expected);
-    }
-    _addDescription({ type, expected, got = this.value }) {
-        this.descriptions.push('Expected'
-            .concat(this.invert ? ' not' : '')
-            .concat(type ? ` ${type}` : '')
-            .concat(` ${valueToStringSafe(expected)},`)
-            .concat(` got ${valueToStringSafe(got)}`));
-    }
-    _expectToBeA(expected) {
-        if (typeof expected === 'string') {
-            return this._expectToBeATypeOf(expected);
-        }
-        else {
-            return this._expectToBeAnInstanceOf(expected);
-        }
-    }
-    _expectToBeAnInstanceOf(expected) {
-        return this.execute(() => {
-            this._addDescription({ type: 'instanceof', expected: (expected === null || expected === void 0 ? void 0 : expected.name) || expected });
-            return this.value instanceof (expected);
-        });
-    }
-    _expectToBeATypeOf(expected) {
-        return this.execute(() => {
-            this._addDescription({ type: 'typeof', expected });
-            console.assert(validTypeOfs.includes(expected), 'unknown typeof value');
-            // eslint-disable-next-line valid-typeof
-            return typeof this.value === expected;
-        });
-    }
-    _expectToBeTruthy() {
-        return this.execute(() => {
-            this._addDescription({ expected: 'truthy value' });
-            return !!this.value;
-        });
-    }
-    _expectToBeFalsy() {
-        return this.execute(() => {
-            this._addDescription({ expected: 'falsy value' });
-            return !this.value;
-        });
-    }
-    execute(predicate) {
-        const result = this.invert ? !predicate() : predicate();
-        const description = this.descriptions.length > 0
-            ? this.descriptions.join('. ').concat('.')
-            : 'No description';
-        console.assert(result, description);
-        return Boolean(result);
+        return __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_execute).call(this, () => __classPrivateFieldGet(this, _Assertion_value, "f") === expected);
     }
 }
+exports.Assertion = Assertion;
+_Assertion_value = new WeakMap(), _Assertion_descriptions = new WeakMap(), _Assertion_invert = new WeakMap(), _Assertion_instances = new WeakSet(), _Assertion_addDescription = function _Assertion_addDescription({ type, expected, got = __classPrivateFieldGet(this, _Assertion_value, "f") }) {
+    __classPrivateFieldGet(this, _Assertion_descriptions, "f").push('Expected'
+        .concat(__classPrivateFieldGet(this, _Assertion_invert, "f") ? ' not' : '')
+        .concat(type ? ` ${type}` : '')
+        .concat(` ${valueToStringSafe(expected)},`)
+        .concat(` got ${valueToStringSafe(got)}`));
+}, _Assertion_expectToBeA = function _Assertion_expectToBeA(expected) {
+    if (typeof expected === 'string') {
+        return __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_expectToBeATypeOf).call(this, expected);
+    }
+    else {
+        return __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_expectToBeAnInstanceOf).call(this, expected);
+    }
+}, _Assertion_expectToBeAnInstanceOf = function _Assertion_expectToBeAnInstanceOf(expected) {
+    return __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_execute).call(this, () => {
+        __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_addDescription).call(this, { type: 'instanceof', expected: (expected === null || expected === void 0 ? void 0 : expected.name) || expected });
+        return __classPrivateFieldGet(this, _Assertion_value, "f") instanceof (expected);
+    });
+}, _Assertion_expectToBeATypeOf = function _Assertion_expectToBeATypeOf(expected) {
+    return __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_execute).call(this, () => {
+        __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_addDescription).call(this, { type: 'typeof', expected });
+        console.assert(validTypeOfs.includes(expected), 'unknown typeof value');
+        // eslint-disable-next-line valid-typeof
+        return typeof __classPrivateFieldGet(this, _Assertion_value, "f") === expected;
+    });
+}, _Assertion_expectToBeTruthy = function _Assertion_expectToBeTruthy() {
+    return __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_execute).call(this, () => {
+        __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_addDescription).call(this, { expected: 'truthy value' });
+        return !!__classPrivateFieldGet(this, _Assertion_value, "f");
+    });
+}, _Assertion_expectToBeFalsy = function _Assertion_expectToBeFalsy() {
+    return __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_execute).call(this, () => {
+        __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_addDescription).call(this, { expected: 'falsy value' });
+        return !__classPrivateFieldGet(this, _Assertion_value, "f");
+    });
+}, _Assertion_execute = function _Assertion_execute(predicate) {
+    const result = __classPrivateFieldGet(this, _Assertion_invert, "f") ? !predicate() : predicate();
+    const description = __classPrivateFieldGet(this, _Assertion_descriptions, "f").length > 0
+        ? __classPrivateFieldGet(this, _Assertion_descriptions, "f").join('. ').concat('.')
+        : 'No description';
+    console.assert(result, description);
+    return Boolean(result);
+};
 function valueToStringSafe(value) {
     const stringValue = String(value);
     if (stringValue === '') {
@@ -106,6 +117,7 @@ function valueToStringSafe(value) {
 function describe(description) {
     return { expect: expect.bind({ description }) };
 }
+;
 function expect(value) {
     const assertionInstance = new Assertion({
         value,
@@ -113,12 +125,12 @@ function expect(value) {
     });
     const proxyHandler = {
         get(target, prop, receiver) {
-            const value = Reflect.get(target, prop, receiver);
+            const assertionValue = Reflect.get(target, prop, receiver);
             if (prop === 'not') {
-                return target.not();
+                return target.invertPredicate();
             }
             else {
-                return value;
+                return assertionValue;
             }
         }
     };

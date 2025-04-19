@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-import type { AssertionType } from '../index.d.js';
-
 const validTypeOfs = [
   'undefined',
   'object',
@@ -17,105 +15,105 @@ const validTypeOfs = [
   'function'
 ];
 
-class Assertion implements AssertionType {
-  value;
-  descriptions;
-  invert = false;
+export class Assertion {
+  #value;
+  #descriptions;
+  #invert = false;
   to;
   be;
 
   constructor ({ value, description }: { value: any, description?: string }) {
-    this.value = value;
-    this.descriptions = [
+    this.#value = value;
+    this.#descriptions = [
       ...(typeof description === 'string' ? [description] : [])
     ];
 
     this.to = this;
     this.be = {
-      a: this._expectToBeA.bind(this),
-      an: this._expectToBeA.bind(this),
-      typeOf: this._expectToBeATypeOf.bind(this),
-      instanceOf: this._expectToBeAnInstanceOf.bind(this),
-      truthy: this._expectToBeTruthy.bind(this),
-      falsy: this._expectToBeFalsy.bind(this),
+      a: this.#expectToBeA.bind(this),
+      an: this.#expectToBeA.bind(this),
+      typeOf: this.#expectToBeATypeOf.bind(this),
+      instanceOf: this.#expectToBeAnInstanceOf.bind(this),
+      truthy: this.#expectToBeTruthy.bind(this),
+      falsy: this.#expectToBeFalsy.bind(this),
     };
   }
 
-  not () {
-    this.invert = true;
+  invertPredicate () {
+    this.#invert = true;
     return this;
   }
 
   equal (expected: any) {
-    this._addDescription({ expected });
-    if ([expected, this.value].some((x) => typeof x === 'symbol')) {
-      this.descriptions.push('Symbols are always unique');
+    this.#addDescription({ expected });
+    if ([expected, this.#value].some((x) => typeof x === 'symbol')) {
+      this.#descriptions.push('Symbols are always unique');
     }
-    return this.execute(() => this.value === expected);
+    return this.#execute(() => this.#value === expected);
   }
 
-  _addDescription (
+  #addDescription (
     {
       type,
       expected,
-      got = this.value
+      got = this.#value
     }: {
       type?: string;
       expected: any;
       got?: any;
     }) {
-    this.descriptions.push(
+    this.#descriptions.push(
       'Expected'
-        .concat(this.invert ? ' not' : '')
+        .concat(this.#invert ? ' not' : '')
         .concat(type ? ` ${type}` : '')
         .concat(` ${valueToStringSafe(expected)},`)
         .concat(` got ${valueToStringSafe(got)}`)
     );
   }
 
-  _expectToBeA (expected: any) {
+  #expectToBeA (expected: any) {
     if (typeof expected === 'string') {
-      return this._expectToBeATypeOf(expected);
+      return this.#expectToBeATypeOf(expected);
     } else {
-      return this._expectToBeAnInstanceOf(expected);
+      return this.#expectToBeAnInstanceOf(expected);
     }
   }
 
-  _expectToBeAnInstanceOf (expected: any) {
-    return this.execute(() => {
-      this._addDescription({ type: 'instanceof', expected: expected?.name || expected });
-      return this.value instanceof (expected);
+  #expectToBeAnInstanceOf (expected: any) {
+    return this.#execute(() => {
+      this.#addDescription({ type: 'instanceof', expected: expected?.name || expected });
+      return this.#value instanceof (expected);
     });
   }
 
-  _expectToBeATypeOf (expected: any) {
-    return this.execute(() => {
-      this._addDescription({ type: 'typeof', expected });
+  #expectToBeATypeOf (expected: any) {
+    return this.#execute(() => {
+      this.#addDescription({ type: 'typeof', expected });
 
       console.assert(validTypeOfs.includes(expected), 'unknown typeof value');
       // eslint-disable-next-line valid-typeof
-      return typeof this.value === expected;
+      return typeof this.#value === expected;
     });
   }
 
-  _expectToBeTruthy () {
-    return this.execute(() => {
-      this._addDescription({ expected: 'truthy value' });
-      return !!this.value;
+  #expectToBeTruthy () {
+    return this.#execute(() => {
+      this.#addDescription({ expected: 'truthy value' });
+      return !!this.#value;
     });
   }
 
-  _expectToBeFalsy () {
-    return this.execute(() => {
-      this._addDescription({ expected: 'falsy value' });
-      return !this.value;
+  #expectToBeFalsy () {
+    return this.#execute(() => {
+      this.#addDescription({ expected: 'falsy value' });
+      return !this.#value;
     });
    }
 
-  execute (predicate: () => any) {
-    const result = this.invert ? !predicate() : predicate();
-    const description = this.descriptions.length > 0
-      ? this.descriptions.join('. ').concat('.')
+  #execute (predicate: () => any) {
+    const result = this.#invert ? !predicate() : predicate();
+    const description = this.#descriptions.length > 0
+      ? this.#descriptions.join('. ').concat('.')
       : 'No description';
     console.assert(result, description);
     return Boolean(result);
@@ -135,7 +133,11 @@ export function describe (description: string) {
   return { expect: expect.bind({ description }) };
 }
 
-export function expect (this: { description?: string }, value: any) {
+interface AssertionProxy extends Assertion {
+  not: Assertion;
+};
+
+export function expect (this: { description?: string }, value: any): AssertionProxy {
   const assertionInstance = new Assertion({
     value,
     description: this?.description
@@ -145,7 +147,7 @@ export function expect (this: { description?: string }, value: any) {
     get (target: any, prop: string, receiver: any) {
       const assertionValue = Reflect.get(target, prop, receiver);
       if (prop === 'not') {
-        return target.not();
+        return target.invertPredicate();
       } else {
         return assertionValue;
       }
