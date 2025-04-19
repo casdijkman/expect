@@ -115,13 +115,15 @@ function valueToStringSafe(value) {
     return stringValue || 'unknown';
 }
 function describe(description) {
-    return { expect: expect.bind({ description }) };
+    return {
+        expect: (value) => expect(value, { description })
+    };
 }
 ;
-function expect(value) {
+function expect(value, options) {
     const assertionInstance = new Assertion({
         value,
-        description: this === null || this === void 0 ? void 0 : this.description
+        description: options === null || options === void 0 ? void 0 : options.description
     });
     const proxyHandler = {
         get(target, prop, receiver) {

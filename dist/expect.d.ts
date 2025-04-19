@@ -22,7 +22,7 @@ export declare function describe(description: string): {
 interface AssertionProxy extends Assertion {
     not: Assertion;
 }
-export declare function expect(this: {
+export declare function expect(value: any, options?: {
     description?: string;
-}, value: any): AssertionProxy;
+}): AssertionProxy;
 export {};

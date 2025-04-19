@@ -130,17 +130,24 @@ function valueToStringSafe (value: any) {
 }
 
 export function describe (description: string) {
-  return { expect: expect.bind({ description }) };
+  return {
+    expect: (value: any) => expect(value, {description})
+  };
 }
 
 interface AssertionProxy extends Assertion {
   not: Assertion;
 };
 
-export function expect (this: { description?: string }, value: any): AssertionProxy {
+export function expect (
+  value: any,
+  options? : {
+    description?: string,
+  }
+): AssertionProxy {
   const assertionInstance = new Assertion({
     value,
-    description: this?.description
+    description: options?.description
   });
 
   const proxyHandler = {
