@@ -4,7 +4,7 @@ export declare class Assertion {
     be: {
         a: (expected: any) => boolean;
         an: (expected: any) => boolean;
-        typeOf: (expected: any) => boolean;
+        typeOf: (expected: string) => boolean;
         instanceOf: (expected: any) => boolean;
         truthy: () => boolean;
         falsy: () => boolean;
@@ -19,9 +19,9 @@ export declare class Assertion {
 export declare function describe(description: string): {
     expect: (value: any) => AssertionProxy;
 };
-interface AssertionProxy extends Assertion {
+type AssertionProxy = {
     not: Assertion;
-}
+} & Assertion;
 export declare function expect(value: any, options?: {
     description?: string;
 }): AssertionProxy;

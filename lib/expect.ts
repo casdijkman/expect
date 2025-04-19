@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-const validTypeOfs = [
+const validTypeOfs = new Set([
   'undefined',
   'object',
   'boolean',
@@ -12,20 +12,21 @@ const validTypeOfs = [
   'bigint',
   'string',
   'symbol',
-  'function'
-];
+  'function',
+]);
 
 export class Assertion {
-  #value;
-  #descriptions;
-  #invert = false;
   to;
   be;
+  readonly #value;
+  readonly #descriptions;
+  #invert = false;
 
-  constructor ({ value, description }: { value: any, description?: string }) {
+  constructor({ value, description }: { value: any; description?: string }) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.#value = value;
     this.#descriptions = [
-      ...(typeof description === 'string' ? [description] : [])
+      ...(typeof description === 'string' ? [description] : []),
     ];
 
     this.to = this;
@@ -39,24 +40,26 @@ export class Assertion {
     };
   }
 
-  invertPredicate () {
+  invertPredicate() {
     this.#invert = true;
     return this;
   }
 
-  equal (expected: any) {
+  equal(expected: any) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.#addDescription({ expected });
     if ([expected, this.#value].some((x) => typeof x === 'symbol')) {
       this.#descriptions.push('Symbols are always unique');
     }
+
     return this.#execute(() => this.#value === expected);
   }
 
-  #addDescription (
+  #addDescription(
     {
       type,
       expected,
-      got = this.#value
+      got,
     }: {
       type?: string;
       expected: any;
@@ -67,99 +70,104 @@ export class Assertion {
         .concat(this.#invert ? ' not' : '')
         .concat(type ? ` ${type}` : '')
         .concat(` ${valueToStringSafe(expected)},`)
-        .concat(` got ${valueToStringSafe(got)}`)
+        .concat(` got ${valueToStringSafe(got ?? this.#value)}`),
     );
   }
 
-  #expectToBeA (expected: any) {
-    if (typeof expected === 'string') {
-      return this.#expectToBeATypeOf(expected);
-    } else {
-      return this.#expectToBeAnInstanceOf(expected);
-    }
+  #expectToBeA(expected: any) {
+    return typeof expected === 'string'
+      ? this.#expectToBeATypeOf(expected)
+      : this.#expectToBeAnInstanceOf(expected);
   }
 
-  #expectToBeAnInstanceOf (expected: any) {
+  #expectToBeAnInstanceOf(expected: any) {
     return this.#execute(() => {
-      this.#addDescription({ type: 'instanceof', expected: expected?.name || expected });
+      this.#addDescription({
+        type: 'instanceof',
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        expected: expected?.name || expected,
+      });
       return this.#value instanceof (expected);
     });
   }
 
-  #expectToBeATypeOf (expected: any) {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  #expectToBeATypeOf(expected: string) {
     return this.#execute(() => {
       this.#addDescription({ type: 'typeof', expected });
 
-      console.assert(validTypeOfs.includes(expected), 'unknown typeof value');
-      // eslint-disable-next-line valid-typeof
+      console.assert(validTypeOfs.has(expected), 'unknown typeof value');
+
       return typeof this.#value === expected;
     });
   }
 
-  #expectToBeTruthy () {
+  #expectToBeTruthy() {
     return this.#execute(() => {
       this.#addDescription({ expected: 'truthy value' });
-      return !!this.#value;
+      return Boolean(this.#value);
     });
   }
 
-  #expectToBeFalsy () {
+  #expectToBeFalsy() {
     return this.#execute(() => {
       this.#addDescription({ expected: 'falsy value' });
       return !this.#value;
     });
-   }
+  }
 
-  #execute (predicate: () => any) {
-    const result = this.#invert ? !predicate() : predicate();
+  #execute(predicate: () => any) {
+    const result = Boolean(this.#invert ? !predicate() : predicate());
     const description = this.#descriptions.length > 0
       ? this.#descriptions.join('. ').concat('.')
       : 'No description';
     console.assert(result, description);
-    return Boolean(result);
+    return result;
   }
 }
 
-function valueToStringSafe (value: any) {
+function valueToStringSafe(value: any) {
   const stringValue = String(value);
   if (stringValue === '') {
     return '<empty string>';
   }
+
   console.assert(Boolean(stringValue), 'could not convert value to string', value);
   return stringValue || 'unknown';
 }
 
-export function describe (description: string) {
+export function describe(description: string) {
   return {
-    expect: (value: any) => expect(value, {description})
+    expect: (value: any) => expect(value, { description }),
   };
 }
 
-interface AssertionProxy extends Assertion {
+type AssertionProxy = {
   not: Assertion;
-};
+} & Assertion;
 
-export function expect (
+export function expect(
   value: any,
-  options? : {
-    description?: string,
-  }
+  options?: {
+    description?: string;
+  },
 ): AssertionProxy {
   const assertionInstance = new Assertion({
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     value,
-    description: options?.description
+    description: options?.description,
   });
 
   const proxyHandler = {
-    get (target: any, prop: string, receiver: any) {
-      const assertionValue = Reflect.get(target, prop, receiver);
-      if (prop === 'not') {
+    get(target: Assertion, property: string, receiver: any) {
+      const assertionValue = Reflect.get(target, property, receiver) as Assertion;
+      if (property === 'not') {
         return target.invertPredicate();
-      } else {
-        return assertionValue;
       }
-    }
+
+      return assertionValue;
+    },
   };
 
-  return new Proxy(assertionInstance, proxyHandler);
+  return new Proxy(assertionInstance, proxyHandler) as AssertionProxy;
 }

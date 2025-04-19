@@ -21,9 +21,27 @@
     "url": "https://github.com/casdijkman/expect/issues"
   },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "lint": "xo --space"
   },
   "devDependencies": {
-    "typescript": "^5.8.3"
+    "@types/xo": "^0",
+    "typescript": "^5.8.3",
+    "xo": "^0.60.0"
+  },
+  "xo": {
+    "ignores": [
+      "dist"
+    ],
+    "rules": {
+      "@typescript-eslint/object-curly-spacing": [
+        "error",
+        "always"
+      ],
+      "arrow-parens": [
+        "error",
+        "always"
+      ]
+    }
   }
 }
