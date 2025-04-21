@@ -15,7 +15,7 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _Assertion_instances, _Assertion_value, _Assertion_descriptions, _Assertion_invert, _Assertion_addDescription, _Assertion_expectToBeA, _Assertion_expectToBeAnInstanceOf, _Assertion_expectToBeATypeOf, _Assertion_expectToBeTruthy, _Assertion_expectToBeFalsy, _Assertion_execute;
+var _Assertion_instances, _Assertion_value, _Assertion_descriptions, _Assertion_invert, _Assertion_addDescription, _Assertion_expectToBeA, _Assertion_expectToBeAnInstanceOf, _Assertion_expectToBeATypeOf, _Assertion_expectToBeTrue, _Assertion_expectToBeTruthy, _Assertion_expectToBeFalse, _Assertion_expectToBeFalsy, _Assertion_execute;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Assertion = void 0;
 exports.describe = describe;
@@ -47,7 +47,9 @@ class Assertion {
             an: __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_expectToBeA).bind(this),
             typeOf: __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_expectToBeATypeOf).bind(this),
             instanceOf: __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_expectToBeAnInstanceOf).bind(this),
+            true: __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_expectToBeTrue).bind(this),
             truthy: __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_expectToBeTruthy).bind(this),
+            false: __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_expectToBeFalse).bind(this),
             falsy: __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_expectToBeFalsy).bind(this),
         };
     }
@@ -90,10 +92,20 @@ _Assertion_value = new WeakMap(), _Assertion_descriptions = new WeakMap(), _Asse
         console.assert(validTypeOfs.has(expected), 'unknown typeof value');
         return typeof __classPrivateFieldGet(this, _Assertion_value, "f") === expected;
     });
+}, _Assertion_expectToBeTrue = function _Assertion_expectToBeTrue() {
+    return __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_execute).call(this, () => {
+        __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_addDescription).call(this, { expected: 'true' });
+        return __classPrivateFieldGet(this, _Assertion_value, "f") === true;
+    });
 }, _Assertion_expectToBeTruthy = function _Assertion_expectToBeTruthy() {
     return __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_execute).call(this, () => {
         __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_addDescription).call(this, { expected: 'truthy value' });
         return Boolean(__classPrivateFieldGet(this, _Assertion_value, "f"));
+    });
+}, _Assertion_expectToBeFalse = function _Assertion_expectToBeFalse() {
+    return __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_execute).call(this, () => {
+        __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_addDescription).call(this, { expected: 'false' });
+        return __classPrivateFieldGet(this, _Assertion_value, "f") === false;
     });
 }, _Assertion_expectToBeFalsy = function _Assertion_expectToBeFalsy() {
     return __classPrivateFieldGet(this, _Assertion_instances, "m", _Assertion_execute).call(this, () => {

@@ -35,7 +35,9 @@ export class Assertion {
       an: this.#expectToBeA.bind(this),
       typeOf: this.#expectToBeATypeOf.bind(this),
       instanceOf: this.#expectToBeAnInstanceOf.bind(this),
+      true: this.#expectToBeTrue.bind(this),
       truthy: this.#expectToBeTruthy.bind(this),
+      false: this.#expectToBeFalse.bind(this),
       falsy: this.#expectToBeFalsy.bind(this),
     };
   }
@@ -102,10 +104,24 @@ export class Assertion {
     });
   }
 
+  #expectToBeTrue() {
+    return this.#execute(() => {
+      this.#addDescription({ expected: 'true' });
+      return this.#value === true;
+    });
+  }
+
   #expectToBeTruthy() {
     return this.#execute(() => {
       this.#addDescription({ expected: 'truthy value' });
       return Boolean(this.#value);
+    });
+  }
+
+  #expectToBeFalse() {
+    return this.#execute(() => {
+      this.#addDescription({ expected: 'false' });
+      return this.#value === false;
     });
   }
 

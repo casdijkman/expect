@@ -6,7 +6,9 @@ export declare class Assertion {
         an: (expected: any) => boolean;
         typeOf: (expected: string) => boolean;
         instanceOf: (expected: any) => boolean;
+        true: () => boolean;
         truthy: () => boolean;
+        false: () => boolean;
         falsy: () => boolean;
     };
     constructor({ value, description }: {
