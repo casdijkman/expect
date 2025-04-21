@@ -1,6 +1,6 @@
 {
   "name": "@casd/expect",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Simple javascript expect library, no frills",
   "author": "Cas Dijkman <info@cdijkman.nl> (https://cdijkman.nl)",
   "keywords": [
