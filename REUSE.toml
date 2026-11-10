@@ -1,0 +1,13 @@
+version = 1
+
+[[annotations]]
+path = [
+  "dist/expect.d.ts",
+  "package.json",
+  "tsconfig.json",
+  "yarn.lock",
+  ".editorconfig",
+  ".nvmrc"
+]
+SPDX-FileCopyrightText = "2025 Cas Dijkman"
+SPDX-License-Identifier = "GPL-3.0-only"

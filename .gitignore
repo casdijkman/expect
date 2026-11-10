@@ -1,5 +1,9 @@
 # -*- mode: gitignore; -*-
 
+# SPDX-FileCopyrightText: 2025 Cas Dijkman
+#
+# SPDX-License-Identifier: GPL-3.0-only
+
 ### Node ###
 # Dependency directories
 node_modules/
